@@ -18,7 +18,10 @@ class Trigger(object):
         self.pattern = "(feat|fix|test|refactor|docs|style|chroe)\(.*\):.*"
         # GMT格式：Fri Feb 21 15:16:07 2020 +0800
         self.gmt_format = '%a %b %d %H:%M:%S %Y +0800'
-        self.branch = ""
+        # 需要验证的分支多个用|间隔
+        self.branch = "dev|master"
+        # 删除/新增 时的commitId
+        self.base_commit_id = "0000000000000000000000000000000000000000"
 
     def pushSuccessBack(self):
         print("push success!")
@@ -41,8 +44,10 @@ class Trigger(object):
     # 获取提交的git信息
     def getGitPushInfo(self):
         oldObject, newObject, ref = sys.stdin.readline().strip().split(' ')
-        self.branch = str(ref).split("/")[2]
-        if self.branch == "dev":
+        branch = str(ref).split("/")[2]
+        if oldObject == self.base_commit_id or newObject == self.base_commit_id:
+            self.pushSuccessBack()
+        elif branch in self.branch:
             self.getPushInfo(oldObject, newObject)
         else:
             self.pushSuccessBack()
