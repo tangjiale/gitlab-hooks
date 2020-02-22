@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2020-02-20 19:26
 # @Author  : jiale
-# @Site    : 
+# @Site    :
 # @File    : pre-receive.py
 # @Software: PyCharm
 from datetime import datetime
@@ -69,22 +69,37 @@ class ReceiveTrigger(object):
         for pObject in pushList:
             p = subprocess.Popen('git show ' + pObject.decode("utf-8"), shell=True, stdout=subprocess.PIPE)
             pipe = p.stdout.readlines()
-            pipe = [x.strip() for x in pipe]
-            print("pipe=%s" % pipe)
-            push_author = pipe[1].decode("utf-8").strip("Author:").strip()
-            push_time = pipe[2].decode("utf-8").strip("Date:").strip()
-            push_msg = pipe[4].decode("utf-8").strip()
+            # pipe = [x.strip() for x in pipe]
+            # push_author = pipe[1].decode("utf-8").strip("Author:").strip()
+            # push_time = pipe[2].decode("utf-8").strip("Date:").strip()
+            # push_msg = pipe[4].decode("utf-8").strip()
             # 获取文件列表
             # self.fileList.extend(['/'.join(fileName.split("/")[1:]) for fileName in pipe if
             #                       fileName.startswith("+++") and not fileName.endswith("null")])
-            print("推送时间:", datetime.strptime(push_time, self.gmt_format))
-            print("推送作者:", push_author)
+            resultPipe = self.parsePipe(pipe)
+            push_msg = resultPipe["push_msg"]
+            print("推送时间:", datetime.strptime(resultPipe["push_time"], self.gmt_format))
+            print("推送作者:", resultPipe["push_author"])
             print("推送日志信息:", push_msg)
             if re.match(self.pattern, push_msg, re.M | re.I):
-                print("push success!message=%s" % push_msg)
+                print("push success!")
+                print("push message = %s" % push_msg)
                 sys.exit(0)
             else:
                 self.pushFailBack()
+
+    # 解析提交信息
+    def parsePipe(self, pipe):
+        result = {}
+        print("pipe= %s" % pipe)
+        for x in pipe:
+            temp = x.strip().decode("utf-8")
+            if temp.startswith("Author"):
+                result["push_author"] = temp.strip("Author:").strip()
+            elif temp.startswith("Date"):
+                result["push_time"] = temp.strip("Date:").strip()
+        result["push_msg"] = pipe[pipe.index(b"\n") + 1].decode("utf-8").strip()
+        return result
 
 
 if __name__ == "__main__":
