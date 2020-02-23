@@ -15,7 +15,7 @@ import re
 class ReceiveTrigger(object):
 
     def __init__(self):
-        self.pattern = "(feat|fix|test|refactor|docs|style|chroe)\(.*\):.*"
+        self.pattern = "(feat|fix|test|refactor|docs|style|chroe)\(.*\)：.*"
         # GMT格式：Fri Feb 21 15:16:07 2020 +0800
         self.gmt_format = '%a %b %d %H:%M:%S %Y +0800'
         # 需要验证的分支,多个用|间隔
