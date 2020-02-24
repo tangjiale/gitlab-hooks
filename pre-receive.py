@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # @Time    : 2020-02-20 19:26
-# @Author  : jiale
+# @Author  : tangjiale
 # @Site    :
 # @File    : pre-receive.py
 # @Software: PyCharm
@@ -15,30 +15,42 @@ import re
 class ReceiveTrigger(object):
 
     def __init__(self):
-        self.pattern = "(feat|fix|test|refactor|docs|style|chroe)\(.*\)：.*"
+        # 格式：type(功能模块)：message
+        self.pattern = "(feat|fix|test|refactor|docs|style|chroe|perf|revert|ci|build)\(.*\)：.*"
         # GMT格式：Fri Feb 21 15:16:07 2020 +0800
         self.gmt_format = '%a %b %d %H:%M:%S %Y +0800'
         # 需要验证的分支,多个用|间隔
-        self.branch = "dev|master"
+        self.branch = "dev"
         # 删除/新增 时的commitId
         self.base_commit_id = "0000000000000000000000000000000000000000"
 
     def pushSuccessBack(self):
-        print("push success!")
+        print("push success！！！")
         sys.exit(0)
 
-    # 推送消息失败返回
-    def pushFailBack(self):
+    # 格式检查推送消息失败返回
+    def pushStyleFailBack(self):
         print("##################################################################")
         print("##                                                              ##")
         print("## push message style check failed!                             ##")
         print("##                                                              ##")
-        print("## type must be one of [feat,fix,docs,style,refactor,test,chore]##")
-        print("##                                                              ##")
+        print("## type must be one of [feat,fix,docs,style,refactor,test,chore,##")
+        print("## perf,revert,ci,build]                                        ##")
         print("## Example:                                                     ##")
         print("##   feat(user): add the user login.                            ##")
         print("##                                                              ##")
         print("##################################################################")
+        sys.exit(1)
+
+    # 格式检查推送消息失败返回
+    def pushMessageLenFailBack(self):
+        print("#########################################")
+        print("##                                     ##")
+        print("## push message length check failed!   ##")
+        print("##                                     ##")
+        print("## message must be more 5 and less 100 ##")
+        print("##                                     ##")
+        print("#########################################")
         sys.exit(1)
 
     # 获取提交的git信息
@@ -81,19 +93,24 @@ class ReceiveTrigger(object):
             print("推送时间:", datetime.strptime(resultPipe["push_time"], self.gmt_format))
             print("推送作者:", resultPipe["push_author"])
             print("推送日志信息:", push_msg)
+            # 验证消息格式
             if re.match(self.pattern, push_msg, re.M | re.I):
-                print("push success!")
-                print("push message = %s" % push_msg)
+                # 验证message信息字符长度范围
+                msg_arr = push_msg.split("：")
+                if 5 < len(msg_arr[1]) < 100:
+                    self.pushSuccessBack()
+                else:
+                    self.pushMessageLenFailBack()
                 sys.exit(0)
             else:
-                self.pushFailBack()
+                self.pushStyleFailBack()
 
     # 解析提交信息
     def parsePipe(self, pipe):
         result = {}
         print("pipe= %s" % pipe)
         for x in pipe:
-            temp = x.strip().decode("utf-8")
+            temp = x.strip().decode("utf-8", "ignore")
             if temp.startswith("Author"):
                 result["push_author"] = temp.strip("Author:").strip()
             elif temp.startswith("Date"):
