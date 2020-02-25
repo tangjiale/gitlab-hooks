@@ -18,7 +18,7 @@ class ReceiveTrigger(object):
 
     def __init__(self):
         # 格式：type(功能模块)：message
-        self.pattern = "(feat|fix|test|refactor|docs|style|chroe|perf|revert|ci|build)\(.*\)：.*"
+        self.pattern = "(feat|fix|test|refactor|docs|style|chroe|perf|revert|ci|build)\(.*\):( ).*"
         # GMT格式：Fri Feb 21 15:16:07 2020 +0800
         self.gmt_format = '%a %b %d %H:%M:%S %Y +0800'
         # 需要验证的分支,多个用|间隔
@@ -44,7 +44,7 @@ class ReceiveTrigger(object):
         print("##################################################################")
         sys.exit(1)
 
-    # 格式检查推送消息失败返回
+    # 消息长度检查推送消息失败返回
     def pushMessageLenFailBack(self):
         print("#########################################")
         print("##                                     ##")
@@ -99,7 +99,7 @@ class ReceiveTrigger(object):
                 # 验证消息格式
                 if re.match(self.pattern, push_msg, re.M | re.I):
                     # 验证message信息字符长度范围
-                    msg_arr = push_msg.split("：")
+                    msg_arr = push_msg.split(":")
                     if 5 < len(msg_arr[1]) < 100:
                         continue
                     else:
