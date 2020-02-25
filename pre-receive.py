@@ -95,16 +95,17 @@ class ReceiveTrigger(object):
             print("推送时间:", datetime.strptime(resultPipe["push_time"], self.gmt_format))
             print("推送作者:", resultPipe["push_author"])
             print("推送日志信息:", push_msg)
-            # 验证消息格式
-            if re.match(self.pattern, push_msg, re.M | re.I):
-                # 验证message信息字符长度范围
-                msg_arr = push_msg.split("：")
-                if 5 < len(msg_arr[1]) < 100:
-                    continue
+            if not push_msg.startswith("Merge remote"):
+                # 验证消息格式
+                if re.match(self.pattern, push_msg, re.M | re.I):
+                    # 验证message信息字符长度范围
+                    msg_arr = push_msg.split("：")
+                    if 5 < len(msg_arr[1]) < 100:
+                        continue
+                    else:
+                        self.pushMessageLenFailBack()
                 else:
-                    self.pushMessageLenFailBack()
-            else:
-                self.pushStyleFailBack()
+                    self.pushStyleFailBack()
         self.pushSuccessBack()
 
     # 解析提交信息
@@ -124,4 +125,3 @@ class ReceiveTrigger(object):
 if __name__ == "__main__":
     receive = ReceiveTrigger()
     receive.getGitPushInfo()
-
