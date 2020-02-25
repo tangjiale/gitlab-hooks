@@ -9,6 +9,8 @@ from datetime import datetime
 import subprocess
 import sys
 import re
+import codecs
+sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
 
 # pre-receive Trigger
@@ -98,12 +100,12 @@ class ReceiveTrigger(object):
                 # 验证message信息字符长度范围
                 msg_arr = push_msg.split("：")
                 if 5 < len(msg_arr[1]) < 100:
-                    self.pushSuccessBack()
+                    continue
                 else:
                     self.pushMessageLenFailBack()
-                sys.exit(0)
             else:
                 self.pushStyleFailBack()
+        self.pushSuccessBack()
 
     # 解析提交信息
     def parsePipe(self, pipe):
@@ -122,3 +124,4 @@ class ReceiveTrigger(object):
 if __name__ == "__main__":
     receive = ReceiveTrigger()
     receive.getGitPushInfo()
+
