@@ -95,7 +95,7 @@ class ReceiveTrigger(object):
             print("推送时间:", datetime.strptime(resultPipe["push_time"], self.gmt_format))
             print("推送作者:", resultPipe["push_author"])
             print("推送日志信息:", push_msg)
-            if not push_msg.startswith("Merge remote"):
+            if not push_msg.startswith("Merge"):
                 # 验证消息格式
                 if re.match(self.pattern, push_msg, re.M | re.I):
                     # 验证message信息字符长度范围
